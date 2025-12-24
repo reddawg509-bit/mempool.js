@@ -107,9 +107,109 @@ const { liquid } = mempoolJS({
 
 ---
 
+## **Smart Contracts / Miniscript**
+
+- Bitcoin Miniscript: use `bitcoin.miniscript` to fetch script info and related txs.
+- Liquid contracts/assets: use `liquid.contracts` to fetch contract data and txs.
+
+Examples for Node.js are available under `examples/nodejs`:
+
+- `examples/nodejs/bitcoin/miniscript.ts` — basic usage of `bitcoin.miniscript`.
+- `examples/nodejs/liquid/contracts.ts` — basic usage of `liquid.contracts`.
+ - `examples/nodejs/liquid/nft.ts` — basic usage of `liquid.nft`.
+ - `examples/nodejs/bitcoin/ordinal.ts` — basic usage of `bitcoin.nft` (ordinals).
+- `examples/nodejs/liquid/nft.ts` — basic usage of `liquid.nft`.
+
+Run examples with `ts-node` (requires dev dependencies installed):
+
+```bash
+npm install
+npx ts-node examples/nodejs/bitcoin/miniscript.ts
+npx ts-node examples/nodejs/liquid/contracts.ts
+```
+
+Run tests:
+
+```bash
+npm install
+npm test
+```
+
+---
+
+## **NFTs & Metadata**
+
+- Liquid NFTs: use `liquid.nft` to fetch NFT details, owners and related txs. Examples:
+  - `examples/nodejs/liquid/nft.ts` (basic)
+  - `examples/nodejs/liquid/nft-advanced.ts` (detailed)
+
+- Bitcoin Ordinals: use `bitcoin.nft` to fetch inscription/ordinal info and related txs. Examples:
+  - `examples/nodejs/bitcoin/ordinal.ts` (basic)
+  - `examples/nodejs/bitcoin/ordinal-advanced.ts` (detailed)
+
+- Metadata utilities: `src/utils/metadata.ts` includes helpers:
+  - `resolveMetadataUri(uri)` — normalizes `ipfs://`, `/ipfs/` and `data:` URIs (returns decoded JSON for `data:application/json;base64,`), or returns an HTTP URL for IPFS via gateway.
+  - `ipfsToGateway(uri, gateway?)` — convert `ipfs://` to a gateway URL.
+  - `decodeDataUrl(dataUrl)` — decode base64 data URLs.
+
+Additional metadata features (new):
+  - `setMetadataConfig({ gateways?, cacheDir?, ttlSeconds? })` — configure IPFS gateways, optional on-disk `cacheDir`, and TTL for cached entries (seconds).
+  - `fetchMetadata(uri, options?)` — fetch and parse metadata (handles IPFS gateway fallback, `data:` URIs, and returns parsed JSON/text or base64 for binaries). Supports retry/backoff options.
+  - `clearMetadataCache(uri?)` — clear a specific metadata entry (by URI) or all cached entries when called without arguments.
+  - `invalidateMetadataByUri(uri)` — invalidate a single metadata entry (alias to `clearMetadataCache` for one URI).
+  - `purgeExpiredMetadata()` — remove expired entries from memory and file cache according to current TTL.
+  - `getCacheInfo()` — inspect the in-memory cache keys and ages.
+  - `listCachedUris()` — list cached URIs with cache key, age, and presence.
+  - `startMetadataPurge(intervalSeconds?)` — start a background periodic purge of expired cache entries (returns immediately).
+  - `stopMetadataPurge()` — stop the background purge started with `startMetadataPurge()`.
+  - `autoStartPurge` (in `setMetadataConfig`) — when setting `cacheDir`, pass `{ autoStartPurge: true, purgeIntervalSeconds: 3600 }` to auto-start the background purge. Default is `false`.
+  - Memory cache persistence: when `cacheDir` is set, the in-memory cache is saved to `memory-cache.json` and restored on startup. Use `saveMemoryCache()` / `loadMemoryCache()` programmatically if needed.
+
+Run NFT examples:
+
+```bash
+npm run example:nft -- <nft_id> [count]
+npm run example:nft-basic
+
+npm run example:ordinal -- <id> [count]
+npm run example:ordinal-basic
+```
+
+These helpers and examples make it easier to fetch and resolve off-chain metadata (IPFS/data URLs) commonly used by NFTs.
+
+---
+
+## **CLI Examples**
+
+Use the included interactive CLI to run examples from the command line.
+
+- Run interactive prompt:
+
+```bash
+npm run examples:cli
+```
+
+- Run a miniscript example non-interactively:
+
+```bash
+npm run examples:cli -- miniscript <script> [count]
+```
+
+- Run a liquid contract example non-interactively:
+
+```bash
+npm run examples:cli -- contracts <contract_id> [count]
+```
+
+The `examples:cli` script runs `scripts/examples-cli.ts` which can also be executed directly with `ts-node`.
+
+---
+
 ## **Contributing**
 
 Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
+
+**Security:** See [SECURITY.md](SECURITY.md) for advisory information, recommended mitigations for automatic metadata fetching (COMOLEAK), and responsible disclosure instructions.
 
 ---
 

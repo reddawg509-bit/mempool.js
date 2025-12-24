@@ -9,6 +9,8 @@ import { useLightning } from './app/bitcoin/lightning';
 import { useMempool } from './app/bitcoin/mempool';
 import { useTransactions } from './app/bitcoin/transactions';
 import { useWebsocket } from './app/bitcoin/websocket';
+import { useBitcoinNft } from './app/bitcoin/nft';
+import { useMiniscript } from './app/bitcoin/miniscript';
 
 import { useAssets as useAssetsLiquid } from './app/liquid/assets';
 import { useAddresses as useAddressesLiquid } from './app/liquid/addresses';
@@ -17,6 +19,9 @@ import { useFees as useFeesLiquid } from './app/liquid/fees';
 import { useMempool as useMempoolLiquid } from './app/liquid/mempool';
 import { useTransactions as useTransactionsLiquid } from './app/liquid/transactions';
 import { useWebsocket as useWebsocketLiquid } from './app/liquid/websocket';
+import { useContracts as useContractsLiquid } from './app/liquid/contracts';
+import { useNft as useNftLiquid } from './app/liquid/nft';
+import * as metadataUtils from './utils/metadata';
 
 const hostnameEndpointDefault = 'mempool.space';
 const networkEndpointDefault = 'main';
@@ -29,7 +34,6 @@ const mempool = (
 ): MempoolReturn => {
   if (!hostname) hostname = hostnameEndpointDefault;
   if (!network) network = networkEndpointDefault;
-
   const { api: apiBitcoin } = makeBitcoinAPI({
     hostname,
     network,
@@ -50,12 +54,16 @@ const mempool = (
       fees: useFees(apiBitcoin),
       lightning: useLightning(apiBitcoin),
       mempool: useMempool(apiBitcoin),
+      nft: useBitcoinNft(apiBitcoin),
+      miniscript: useMiniscript(apiBitcoin),
       transactions: useTransactions(apiBitcoin),
       websocket: useWebsocket(hostname, network, protocol),
     },
     liquid: {
       addresses: useAddressesLiquid(apiLiquid),
       assets: useAssetsLiquid(apiLiquid),
+      nft: useNftLiquid(apiLiquid),
+      contracts: useContractsLiquid(apiLiquid),
       blocks: useBlocksLiquid(apiLiquid),
       fees: useFeesLiquid(apiLiquid),
       mempool: useMempoolLiquid(apiLiquid),
@@ -66,4 +74,6 @@ const mempool = (
 };
 
 mempool.default = mempool;
+// attach metadata utilities to top-level export for convenience
+(mempool as any).metadata = metadataUtils;
 export = mempool;
